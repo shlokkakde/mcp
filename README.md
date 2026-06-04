@@ -111,8 +111,9 @@ http://localhost:8787/mcp
 This repo is now shaped for both local Node and Vercel:
 
 - Local development uses `src/http-server.ts`, which calls `app.listen`.
-- Vercel uses `api/index.ts` and `api/[...path].ts`, which forward requests into the same Express app without starting a long-running listener.
-- `vercel.json` rewrites every public path to the API function, so `/login`, `/admin`, `/authorize`, `/token`, and `/mcp` all work as normal URLs.
+- Vercel uses `src/index.ts`, which exports the same Express app without starting a long-running listener.
+- `package.json` points `main` to `src/index.ts`, so Vercel can find the app before TypeScript creates `dist`.
+- `/login`, `/admin`, `/authorize`, `/token`, and `/mcp` are served directly by the Express app.
 
 Step by step:
 
@@ -123,7 +124,7 @@ Step by step:
 3. Use these project settings:
 
 ```text
-Framework Preset: Other
+Framework Preset: Express, or Other if Express is not shown
 Install Command: npm install
 Build Command: npm run build
 Output Directory: leave blank

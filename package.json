@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MCP server for two Neon Postgres CRM databases with CEO and manager access controls.",
   "type": "module",
-  "main": "dist/src/http-server.js",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/http-server.ts",
