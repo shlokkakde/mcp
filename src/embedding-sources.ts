@@ -1,5 +1,5 @@
 import type { Company } from "./auth.js";
-import { embeddingModel } from "./config.js";
+import { embeddingStorageKey } from "./config.js";
 import { contentHash, createEmbeddings, vectorLiteral } from "./embeddings.js";
 import { queryRows } from "./db.js";
 
@@ -143,7 +143,7 @@ async function loadExistingHashes(company: Company): Promise<Map<string, string>
       FROM crm_embeddings
       WHERE embedding_model = $1
     `,
-    [embeddingModel]
+    [embeddingStorageKey]
   );
   return new Map(rows.map((row) => [`${row.source_type}:${row.source_id}`, row.content_hash]));
 }
@@ -184,7 +184,7 @@ export async function upsertEmbedding(company: Company, source: EmbeddingSource,
       source.title,
       source.text_content,
       source.content_hash,
-      embeddingModel,
+      embeddingStorageKey,
       vectorLiteral(embedding),
       source.source_updated_at
     ]
@@ -245,7 +245,7 @@ export async function semanticSearch(
     `,
     [
       vectorLiteral(queryEmbedding),
-      embeddingModel,
+      embeddingStorageKey,
       options.teamCode,
       options.sourceTypes,
       options.excludeSourceCode || null,
@@ -266,7 +266,7 @@ export async function getTaskEmbeddingText(company: Company, taskCode: string): 
         AND source_code = $2
       LIMIT 1
     `,
-    [embeddingModel, taskCode]
+    [embeddingStorageKey, taskCode]
   );
   if (!rows[0]) {
     throw new Error(`No task embedding found for ${taskCode}. Run npm run embeddings:refresh first.`);

@@ -1,14 +1,13 @@
 import "dotenv/config";
 
 import { companies, type Company } from "../src/auth.js";
-import { embeddingDimensions, embeddingModel } from "../src/config.js";
+import { embeddingDimensions, embeddingModel, embeddingProvider, embeddingStorageKey } from "../src/config.js";
 import { closePools } from "../src/db.js";
 import { refreshCompanyEmbeddings } from "../src/embedding-sources.js";
+import { assertEmbeddingConfig } from "../src/embeddings.js";
 
 async function main(): Promise<void> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("Set OPENAI_API_KEY in .env before running embeddings:refresh.");
-  }
+  assertEmbeddingConfig();
 
   const requestedCompany = process.argv.find((arg) => arg.startsWith("--company="))?.split("=")[1] as Company | undefined;
   const targetCompanies = requestedCompany ? [requestedCompany] : [...companies];
@@ -19,8 +18,10 @@ async function main(): Promise<void> {
     }
   }
 
+  console.log(`Embedding provider: ${embeddingProvider}`);
   console.log(`Embedding model: ${embeddingModel}`);
   console.log(`Embedding dimensions: ${embeddingDimensions}`);
+  console.log(`Embedding storage key: ${embeddingStorageKey}`);
 
   for (const company of targetCompanies) {
     const stats = await refreshCompanyEmbeddings(company);

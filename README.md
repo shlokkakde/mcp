@@ -74,7 +74,25 @@ npm run db:setup
 
 The setup script creates `deep_crm` and `poojan_crm`, applies `sql/schema.sql`, and loads the two seed files.
 
-6. Optional, but recommended for semantic search: add `OPENAI_API_KEY` to `.env` and refresh embeddings:
+6. Optional, but recommended for semantic search: add an embedding API key to `.env` and refresh embeddings.
+
+For Gemini:
+
+```env
+EMBEDDING_PROVIDER=gemini
+GEMINI_API_KEY=your-google-ai-studio-key
+EMBEDDING_MODEL=gemini-embedding-001
+EMBEDDING_DIMENSIONS=1536
+```
+
+For OpenAI:
+
+```env
+EMBEDDING_PROVIDER=openai
+OPENAI_API_KEY=your-openai-key
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIMENSIONS=1536
+```
 
 ```powershell
 npm run embeddings:refresh
@@ -138,8 +156,9 @@ NEON_ADMIN_DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 PUBLIC_BASE_URL=https://your-vercel-project.vercel.app
 OAUTH_ISSUER=https://your-vercel-project.vercel.app
 AUTH_JWT_SECRET=use-a-long-random-secret
-OPENAI_API_KEY=your-openai-key-if-using-embeddings
-EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_PROVIDER=gemini
+GEMINI_API_KEY=your-google-ai-studio-key-if-using-embeddings
+EMBEDDING_MODEL=gemini-embedding-001
 EMBEDDING_DIMENSIONS=1536
 ```
 
