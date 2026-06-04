@@ -7,9 +7,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/http-server.ts",
-    "dev:stdio": "tsx src/server.ts",
+    "dev:stdio": "tsx src/stdio-server.ts",
     "start": "node dist/src/http-server.js",
-    "start:stdio": "node dist/src/server.js",
+    "start:stdio": "node dist/src/stdio-server.js",
     "db:setup": "tsx scripts/setup-neon.ts",
     "embeddings:refresh": "tsx scripts/refresh-embeddings.ts"
   },

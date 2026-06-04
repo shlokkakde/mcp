@@ -180,7 +180,7 @@ Use the built server path in your MCP client configuration.
   "mcpServers": {
     "crm-neon": {
       "command": "node",
-      "args": ["C:\\Users\\shlok\\Documents\\crm-mcp\\dist\\src\\server.js"],
+      "args": ["C:\\Users\\shlok\\Documents\\crm-mcp\\dist\\src\\stdio-server.js"],
       "env": {
         "NEON_ADMIN_DATABASE_URL": "postgresql://USER:PASSWORD@HOST/neondb?sslmode=require",
         "MCP_ACTOR_ID": "deep_sales_manager",
