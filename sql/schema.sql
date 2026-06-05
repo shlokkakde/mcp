@@ -82,12 +82,27 @@ CREATE TABLE IF NOT EXISTS payroll (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS payroll_adjustments (
+  id BIGSERIAL PRIMARY KEY,
+  employee_id BIGINT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  salary_month DATE NOT NULL,
+  overtime_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (overtime_amount >= 0),
+  incentives_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (incentives_amount >= 0),
+  bonus_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (bonus_amount >= 0),
+  payroll_deductions_amount NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (payroll_deductions_amount >= 0),
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (employee_id, salary_month)
+);
+
 CREATE INDEX IF NOT EXISTS idx_employees_team_id ON employees(team_id);
 CREATE INDEX IF NOT EXISTS idx_clients_team_id ON clients(team_id);
 CREATE INDEX IF NOT EXISTS idx_client_tasks_client_id ON client_tasks(client_id);
 CREATE INDEX IF NOT EXISTS idx_client_tasks_assigned_employee_id ON client_tasks(assigned_employee_id);
 CREATE INDEX IF NOT EXISTS idx_client_tasks_status_due_date ON client_tasks(status, due_date);
 CREATE INDEX IF NOT EXISTS idx_attendance_employee_date ON attendance(employee_id, work_date);
+CREATE INDEX IF NOT EXISTS idx_payroll_adjustments_employee_month ON payroll_adjustments(employee_id, salary_month);
 
 CREATE TABLE IF NOT EXISTS manager_access_policies (
   actor_id TEXT PRIMARY KEY,

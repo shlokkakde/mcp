@@ -107,6 +107,28 @@ ON CONFLICT (employee_id) DO UPDATE SET
   effective_from = EXCLUDED.effective_from,
   internal_notes = EXCLUDED.internal_notes;
 
+INSERT INTO payroll_adjustments (
+  employee_id,
+  salary_month,
+  overtime_amount,
+  incentives_amount,
+  bonus_amount,
+  payroll_deductions_amount,
+  notes
+)
+VALUES
+  ((SELECT id FROM employees WHERE employee_code = 'P-EMP-001'), '2026-05-01', 2000.00, 4500.00, 2000.00, 1700.00, 'Seeded May 2026 adjustment.'),
+  ((SELECT id FROM employees WHERE employee_code = 'P-EMP-002'), '2026-05-01', 1100.00, 1800.00, 0.00, 1000.00, 'Seeded May 2026 adjustment.'),
+  ((SELECT id FROM employees WHERE employee_code = 'P-EMP-003'), '2026-05-01', 800.00, 0.00, 1200.00, 900.00, 'Seeded May 2026 adjustment.'),
+  ((SELECT id FROM employees WHERE employee_code = 'P-EMP-004'), '2026-05-01', 2400.00, 3000.00, 2500.00, 1500.00, 'Seeded May 2026 adjustment.')
+ON CONFLICT (employee_id, salary_month) DO UPDATE SET
+  overtime_amount = EXCLUDED.overtime_amount,
+  incentives_amount = EXCLUDED.incentives_amount,
+  bonus_amount = EXCLUDED.bonus_amount,
+  payroll_deductions_amount = EXCLUDED.payroll_deductions_amount,
+  notes = EXCLUDED.notes,
+  updated_at = now();
+
 INSERT INTO attendance (employee_id, work_date, status, notes)
 SELECT
   e.id,

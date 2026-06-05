@@ -30,7 +30,7 @@ Managers can:
 - assign client tasks only to their own team employees
 - update status/comment on their own team tasks
 - query attendance for their own team employees
-- calculate payable salary for their own team employees
+- calculate payable salary for their own team employees from attendance, overtime, incentives, bonuses, and deductions
 
 Managers cannot:
 

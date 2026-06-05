@@ -1043,7 +1043,7 @@ server.registerTool(
   {
     title: "Calculate Payable Salary",
     description:
-      "Calculates payable salary from attendance. Managers get only computed payable amount, never raw payroll fields.",
+      "Calculates payable salary from attendance, monthly payroll salary, overtime, incentives, bonuses, and payroll deductions. Managers get computed salary details without bank or tax fields.",
     inputSchema: {
       company: companySchema.optional(),
       employee_code: z.string(),
@@ -1059,10 +1059,28 @@ server.registerTool(
     const bounds = monthBounds(month || defaultReportingMonth);
     const counts = await attendanceCounts(targetCompany, employee.employee_id, bounds.month);
 
-    const payrollRows = await queryRows<{ monthly_salary: string }>(
+    const payrollRows = await queryRows<{
+      monthly_salary: string;
+      overtime_amount: string;
+      incentives_amount: string;
+      bonus_amount: string;
+      payroll_deductions_amount: string;
+    }>(
       targetCompany,
-      "SELECT monthly_salary::text FROM payroll WHERE employee_id = $1 LIMIT 1",
-      [employee.employee_id]
+      `
+        SELECT
+          p.monthly_salary::text,
+          COALESCE(pa.overtime_amount, 0)::text AS overtime_amount,
+          COALESCE(pa.incentives_amount, 0)::text AS incentives_amount,
+          COALESCE(pa.bonus_amount, 0)::text AS bonus_amount,
+          COALESCE(pa.payroll_deductions_amount, 0)::text AS payroll_deductions_amount
+        FROM payroll p
+        LEFT JOIN payroll_adjustments pa ON pa.employee_id = p.employee_id
+          AND pa.salary_month = $2::date
+        WHERE p.employee_id = $1
+        LIMIT 1
+      `,
+      [employee.employee_id, bounds.startDate]
     );
     if (!payrollRows[0]) {
       throw new Error(`Payroll setup is missing for ${employee.employee_code}.`);
@@ -1074,9 +1092,15 @@ server.registerTool(
     }
 
     const monthlySalary = Number(payrollRows[0].monthly_salary);
+    const overtimeAmount = Number(payrollRows[0].overtime_amount);
+    const incentivesAmount = Number(payrollRows[0].incentives_amount);
+    const bonusAmount = Number(payrollRows[0].bonus_amount);
+    const payrollDeductionsAmount = Number(payrollRows[0].payroll_deductions_amount);
     const paidDays = counts.present + counts.paid_leave;
     const dailyRate = monthlySalary / workingDays;
-    const payableSalary = toMoney(dailyRate * paidDays);
+    const attendanceAdjustedBasePay = toMoney(dailyRate * paidDays);
+    const grossAdditions = toMoney(overtimeAmount + incentivesAmount + bonusAmount);
+    const payableSalary = toMoney(attendanceAdjustedBasePay + grossAdditions - payrollDeductionsAmount);
 
     return jsonResult({
       actor: publicActor(actor),
@@ -1090,9 +1114,16 @@ server.registerTool(
         paid_days: paidDays
       },
       salary_calculation: {
-        formula: "monthly_salary / working_days * paid_days",
+        formula:
+          "(monthly_salary / working_days * paid_days) + overtime_amount + incentives_amount + bonus_amount - payroll_deductions_amount",
         payable_salary: payableSalary,
         currency: "INR",
+        attendance_adjusted_base_pay: attendanceAdjustedBasePay,
+        overtime_amount: overtimeAmount,
+        incentives_amount: incentivesAmount,
+        bonus_amount: bonusAmount,
+        payroll_deductions_amount: payrollDeductionsAmount,
+        gross_additions: grossAdditions,
         raw_payroll_visible: actor.role === "ceo",
         ...(actor.role === "ceo" ? { monthly_salary: monthlySalary, daily_rate: toMoney(dailyRate) } : {})
       },
