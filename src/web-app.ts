@@ -141,31 +141,35 @@ function renderLoginPage(options: {
 }): string {
   const returnTo = options.returnTo ? `<input type="hidden" name="return_to" value="${escapeHtml(options.returnTo)}">` : "";
   const demoEmails = listDemoLoginEmails()
-    .map((user) => `${escapeHtml(user.label)}: <code>${escapeHtml(user.email)}</code>`)
-    .join("<br>");
+    .map((user) => `<span>${escapeHtml(user.label)} <code>${escapeHtml(user.email)}</code></span>`)
+    .join("");
 
   return page(
     options.title,
     `
       <section class="panel auth-panel">
+        <p class="eyebrow">Secure CRM access</p>
         <h1>${escapeHtml(options.title)}</h1>
-        <p class="muted">Use one login page for CEOs and managers. The signed token decides what ChatGPT can access.</p>
+        <p class="muted">Sign in as a CEO or manager. Your session controls which CRM records and tools are available.</p>
         ${options.error ? `<div class="notice error">${escapeHtml(options.error)}</div>` : ""}
-        <form method="post" action="${escapeHtml(options.action)}">
+        <form class="auth-form" method="post" action="${escapeHtml(options.action)}">
           ${options.hiddenFields || ""}
           ${returnTo}
-          <label>
+          <label class="field">
             Email
             <input name="email" type="email" required autocomplete="username" placeholder="name@company.com">
           </label>
-          <label>
+          <label class="field">
             Password
             <input name="password" type="password" required autocomplete="current-password">
           </label>
           <button type="submit">Sign in</button>
         </form>
-        <p class="hint">Demo emails:<br>${demoEmails}</p>
-        <p class="hint">Demo passwords: CEOs use <code>deep-ceo-pass</code> or <code>poojan-ceo-pass</code>; managers use <code>manager-pass</code>.</p>
+        <div class="demo-box">
+          <p class="hint-title">Demo emails</p>
+          <div class="demo-list">${demoEmails}</div>
+          <p class="hint">CEO passwords use <code>deep-ceo-pass</code> or <code>poojan-ceo-pass</code>. Managers use <code>manager-pass</code>.</p>
+        </div>
       </section>
     `
   );
@@ -181,124 +185,328 @@ function page(title: string, body: string): string {
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f7f9;
-      --text: #17202a;
-      --muted: #657080;
-      --line: #d9dee7;
-      --panel: #ffffff;
-      --accent: #136f63;
+      --canvas: #f6f5f4;
+      --surface: #ffffff;
+      --surface-soft: #fbfaf9;
+      --ink: #11100f;
+      --ink-secondary: #31302e;
+      --muted: #615d59;
+      --faint: #a39e98;
+      --hairline: #e6e6e6;
+      --primary: #0075de;
+      --primary-active: #005bab;
       --danger: #a12626;
+      --danger-surface: #fff5f5;
+      --danger-line: #efc3c3;
+      --focus: rgba(0, 117, 222, 0.16);
+      --shadow-soft:
+        rgba(0, 0, 0, 0.01) 0 1px 2px,
+        rgba(0, 0, 0, 0.02) 0 4px 12px,
+        rgba(0, 0, 0, 0.04) 0 12px 30px;
+      --shadow-elevated:
+        rgba(0, 0, 0, 0.03) 0 8px 24px,
+        rgba(0, 0, 0, 0.05) 0 24px 56px;
     }
     * { box-sizing: border-box; }
+    html { background: var(--canvas); }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 360px),
+        var(--canvas);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
     main {
-      width: min(1120px, calc(100% - 32px));
+      width: min(1180px, calc(100% - 48px));
       margin: 0 auto;
-      padding: 32px 0;
+      padding: 34px 0 56px;
     }
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
       padding: 24px;
-      box-shadow: 0 12px 30px rgba(20, 30, 50, 0.07);
+      box-shadow: var(--shadow-soft);
     }
     .auth-panel {
-      max-width: 460px;
+      max-width: 448px;
       margin: 8vh auto 0;
+      padding: 32px;
+    }
+    .home-panel {
+      max-width: 680px;
+      margin-top: 8vh;
     }
     h1, h2 {
       margin: 0 0 10px;
       letter-spacing: 0;
-      line-height: 1.2;
+      line-height: 1.12;
     }
-    h1 { font-size: 28px; }
-    h2 { font-size: 18px; }
-    .muted, .hint { color: var(--muted); }
+    h1 {
+      font-size: 34px;
+      font-weight: 750;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+    p { margin: 0 0 14px; }
+    .muted, .hint {
+      color: var(--muted);
+      line-height: 1.5;
+    }
     .hint { font-size: 13px; }
-    form { display: grid; gap: 14px; }
-    label { display: grid; gap: 6px; font-size: 14px; font-weight: 650; }
+    .eyebrow,
+    .hint-title {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.33;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+    .hint-title {
+      color: var(--ink-secondary);
+      text-transform: none;
+    }
+    form { margin: 0; }
+    .auth-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .field {
+      display: grid;
+      gap: 7px;
+      color: var(--ink-secondary);
+      font-size: 14px;
+      font-weight: 650;
+    }
     input, select {
       min-height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 8px 10px;
+      border: 1px solid #dddddd;
+      border-radius: 4px;
+      padding: 6px 10px;
       font: inherit;
-      background: #fff;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--focus), var(--shadow-soft);
     }
     button, .button {
       min-height: 40px;
       border: 0;
-      border-radius: 6px;
-      padding: 9px 14px;
+      border-radius: 9999px;
+      padding: 9px 18px;
       font: inherit;
-      font-weight: 700;
+      font-weight: 600;
       color: #fff;
-      background: var(--accent);
+      background: var(--primary);
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      line-height: 1.35;
+      transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
     }
-    .button.secondary, button.secondary { background: #485366; }
+    button:active, .button:active {
+      background: var(--primary-active);
+      transform: scale(0.98);
+    }
+    button:focus-visible, .button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .button.secondary, button.secondary {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      color: var(--ink);
+      box-shadow: var(--shadow-soft);
+    }
     .notice {
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 10px 12px;
       margin: 14px 0;
-      border: 1px solid var(--line);
-      background: #f8fafc;
+      border: 1px solid var(--hairline);
+      background: var(--surface-soft);
     }
     .error {
       color: var(--danger);
-      border-color: #efc3c3;
-      background: #fff5f5;
+      border-color: var(--danger-line);
+      background: var(--danger-surface);
+    }
+    .demo-box {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--hairline);
+    }
+    .demo-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .demo-list span {
+      display: flex;
+      min-height: 34px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 7px 9px;
+      background: var(--surface-soft);
+      color: var(--ink-secondary);
+      font-size: 13px;
     }
     .topbar {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 18px;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--hairline);
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 16px;
+      align-items: start;
+    }
+    .company-panel {
+      display: grid;
+      gap: 16px;
+      box-shadow: none;
+    }
+    .company-panel .grid {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
     .manager-card {
       display: grid;
+      gap: 16px;
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      padding: 18px;
+      background: var(--surface);
+    }
+    .manager-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px;
+    }
+    .status-pill {
+      flex: 0 0 auto;
+      border: 1px solid var(--hairline);
+      border-radius: 9999px;
+      padding: 4px 8px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .status-pill.is-active {
+      border-color: #d6eedc;
+      background: #eef8f1;
+      color: #14783d;
+    }
+    .status-pill.is-revoked {
+      border-color: var(--danger-line);
+      background: var(--danger-surface);
+      color: var(--danger);
     }
     .check-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 10px;
+      gap: 8px;
     }
     .check-grid label {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-height: 38px;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--surface-soft);
+      color: var(--ink-secondary);
+      font-size: 13px;
       font-weight: 600;
     }
     .check-grid input {
       min-height: auto;
       width: 16px;
       height: 16px;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+    .manager-card button {
+      justify-self: start;
+      min-height: 38px;
+      padding-inline: 16px;
     }
     code {
-      background: #eef1f5;
+      background: #f1f0ef;
       border-radius: 4px;
       padding: 2px 5px;
+      color: var(--ink-secondary);
+      font-size: 0.95em;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      color: var(--ink-secondary);
+      font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+    @media (max-width: 680px) {
+      main {
+        width: min(100% - 24px, 1180px);
+        padding: 18px 0 34px;
+      }
+      .panel,
+      .auth-panel {
+        padding: 20px;
+      }
+      .auth-panel,
+      .home-panel {
+        margin-top: 24px;
+      }
+      h1 { font-size: 28px; }
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .topbar button,
+      .button,
+      .manager-card button {
+        width: 100%;
+      }
+      .manager-card__header {
+        display: grid;
+      }
+      .status-pill {
+        justify-self: start;
+      }
+      .demo-list span {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -336,7 +544,8 @@ app.get("/", (_req, res) => {
     page(
       "CRM MCP Auth",
       `
-        <section class="panel">
+        <section class="panel home-panel">
+          <p class="eyebrow">CRM MCP server</p>
           <h1>CRM MCP Auth</h1>
           <p class="muted">HTTP MCP endpoint: <code>${escapeHtml(mcpResource)}</code></p>
           <p><a class="button" href="/login">Open Login</a></p>
@@ -501,7 +710,7 @@ app.get("/admin", requireWebActor, async (req, res) => {
     const policies = await listManagerPolicies(company);
     const cards = policies.map((policy) => renderManagerPolicyForm(company, policy)).join("");
     sections.push(`
-      <section class="panel">
+      <section class="panel company-panel">
         <h2>${escapeHtml(company)} manager access</h2>
         <div class="grid">${cards}</div>
       </section>
@@ -519,14 +728,14 @@ app.get("/admin", requireWebActor, async (req, res) => {
           </div>
           <form method="post" action="/logout"><button class="secondary" type="submit">Sign out</button></form>
         </div>
-        <div class="grid">${sections.join("")}</div>
+        <div class="grid company-grid">${sections.join("")}</div>
       `
     )
   );
 });
 
 function checkbox(name: keyof ManagerAccessPatch, checked: boolean, label: string): string {
-  return `<label><input type="checkbox" name="${name}" ${checked ? "checked" : ""}> ${escapeHtml(label)}</label>`;
+  return `<label><input type="checkbox" name="${name}" ${checked ? "checked" : ""}> <span>${escapeHtml(label)}</span></label>`;
 }
 
 function renderManagerPolicyForm(company: Company, policy: Awaited<ReturnType<typeof listManagerPolicies>>[number]): string {
@@ -534,9 +743,12 @@ function renderManagerPolicyForm(company: Company, policy: Awaited<ReturnType<ty
     <form class="manager-card" method="post" action="/admin/access">
       <input type="hidden" name="company" value="${escapeHtml(company)}">
       <input type="hidden" name="manager_actor_id" value="${escapeHtml(policy.actor_id)}">
-      <div>
-        <h2>${escapeHtml(policy.actor_name)}</h2>
-        <p class="muted">${escapeHtml(policy.actor_id)} - ${escapeHtml(policy.team_code)}</p>
+      <div class="manager-card__header">
+        <div>
+          <h3>${escapeHtml(policy.actor_name)}</h3>
+          <p class="muted">${escapeHtml(policy.actor_id)} - ${escapeHtml(policy.team_code)}</p>
+        </div>
+        <span class="status-pill ${policy.active ? "is-active" : "is-revoked"}">${policy.active ? "Active" : "Revoked"}</span>
       </div>
       <div class="check-grid">
         ${checkbox("active", policy.active, "Active")}
