@@ -1394,6 +1394,92 @@ server.registerTool(
 );
 
 server.registerTool(
+  "reassign_task",
+  {
+    title: "Reassign Task to Different Employee",
+    description:
+      "Reassigns an existing client task to a different employee and sends them a Gmail notification. Managers can only reassign tasks for their own team clients to their own team employees.",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false
+    },
+    inputSchema: {
+      company: companySchema.optional(),
+      task_code: z.string(),
+      new_employee_code: z.string()
+    }
+  },
+  async ({ company, task_code, new_employee_code }, extra) => {
+    const actor = await actorFromToolExtra(extra);
+    assertManagerCan(actor, "can_write_tasks");
+    const requestedCompany = chooseRequestedCompany(company, task_code, new_employee_code);
+    const targetCompany = getOneCompany(actor, requestedCompany, "reassigning a task");
+    const task = await getAccessibleTask(targetCompany, actor, task_code);
+    const newEmployee = await getAccessibleEmployee(targetCompany, actor, new_employee_code);
+
+    if (task.team_code !== newEmployee.team_code) {
+      throw new Error(
+        `Cannot reassign task ${task.task_code} to ${new_employee_code}: task team ${task.team_code} differs from employee team ${newEmployee.team_code}.`
+      );
+    }
+
+    const rows = await queryRows<TaskRow>(
+      targetCompany,
+      `
+        UPDATE client_tasks
+        SET
+          assigned_employee_id = $2,
+          updated_at = now()
+        WHERE task_code = $1
+        RETURNING
+          id::text AS task_id,
+          task_code,
+          (SELECT client_code FROM clients WHERE id = client_id) AS client_code,
+          (SELECT name FROM clients WHERE id = client_id) AS client_name,
+          title,
+          description,
+          (SELECT employee_code FROM employees WHERE id = assigned_employee_id) AS assigned_employee_code,
+          (SELECT full_name FROM employees WHERE id = assigned_employee_id) AS assigned_employee_name,
+          status,
+          priority,
+          to_char(due_date, 'YYYY-MM-DD') AS due_date,
+          completed_at::text,
+          completion_notes,
+          $3::text AS team_code,
+          $4::text AS team_name,
+          created_by_actor_id,
+          created_at::text,
+          updated_at::text
+      `,
+      [task.task_id, newEmployee.employee_id, task.team_code, task.team_name]
+    );
+
+    const reassignedTask = rows[0];
+    const emailNotification = await sendTaskAssignmentEmail({
+      to: newEmployee.email,
+      employeeName: newEmployee.full_name,
+      taskCode: reassignedTask.task_code,
+      taskTitle: reassignedTask.title,
+      taskDescription: reassignedTask.description,
+      clientCode: reassignedTask.client_code,
+      clientName: reassignedTask.client_name,
+      dueDate: reassignedTask.due_date,
+      priority: reassignedTask.priority,
+      assignedBy: actor.name
+    });
+
+    return jsonResult({
+      actor: publicActor(actor),
+      company: targetCompany,
+      reassigned_task: reassignedTask,
+      email_notification: emailNotification
+    });
+  }
+);
+
+server.registerTool(
   "refresh_crm_embeddings",
   {
     title: "Refresh CRM Embeddings",
