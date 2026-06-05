@@ -1480,6 +1480,66 @@ server.registerTool(
 );
 
 server.registerTool(
+  "create_employee",
+  {
+    title: "Create New Employee",
+    description:
+      "CEO-only tool. Creates a new employee record in the specified team. Employee code and email must be unique across the system.",
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false
+    },
+    inputSchema: {
+      company: companySchema,
+      employee_code: z.string().min(2).max(50),
+      full_name: z.string().min(2).max(255),
+      email: z.string().email(),
+      job_title: z.string().min(2).max(255),
+      team_code: z.string(),
+      active: z.boolean().optional().default(true)
+    }
+  },
+  async ({ company, employee_code, full_name, email, job_title, team_code, active }, extra) => {
+    const actor = await actorFromToolExtra(extra);
+    assertCeo(actor);
+    assertNoPromptInjection(full_name, "employee full name");
+    assertNoPromptInjection(job_title, "job title");
+
+    const rows = await queryRows<EmployeeRow>(
+      company,
+      `
+        INSERT INTO employees (employee_code, full_name, email, job_title, team_id, active)
+        SELECT $1, $2, $3, $4, t.id, $5
+        FROM teams t
+        WHERE t.team_code = $6
+        RETURNING
+          id::text AS employee_id,
+          employee_code,
+          full_name,
+          email,
+          job_title,
+          active,
+          (SELECT team_code FROM teams WHERE id = team_id) AS team_code,
+          (SELECT name FROM teams WHERE id = team_id) AS team_name
+      `,
+      [employee_code, full_name, email, job_title, active ?? true, team_code]
+    );
+
+    if (!rows[0]) {
+      throw new Error(`Team ${team_code} not found in company ${company}.`);
+    }
+
+    return jsonResult({
+      actor: publicActor(actor),
+      company,
+      created_employee: rows[0]
+    });
+  }
+);
+
+server.registerTool(
   "refresh_crm_embeddings",
   {
     title: "Refresh CRM Embeddings",
