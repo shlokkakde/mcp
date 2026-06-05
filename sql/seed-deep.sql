@@ -18,8 +18,8 @@ INSERT INTO manager_access_policies (
   updated_by_actor_id
 )
 VALUES
-  ('deep_sales_manager', 'Deep Sales Manager', 'D-SALES', true, true, false, true, true, true, true, 'seed'),
-  ('deep_support_manager', 'Deep Support Manager', 'D-SUPPORT', true, true, false, true, true, true, true, 'seed')
+  ('deep_manager_1', 'Deep manager 1', 'D-SALES', true, true, false, true, true, true, true, 'seed'),
+  ('deep_manager_2', 'Deep manager 2', 'D-SUPPORT', true, true, false, true, true, true, true, 'seed')
 ON CONFLICT (actor_id) DO UPDATE SET
   actor_name = EXCLUDED.actor_name,
   team_code = EXCLUDED.team_code,
@@ -67,11 +67,11 @@ ON CONFLICT (client_code) DO UPDATE SET
 
 INSERT INTO client_tasks (task_code, client_id, title, description, assigned_employee_id, created_by_actor_id, status, priority, due_date, completed_at, completion_notes)
 VALUES
-  ('D-TASK-001', (SELECT id FROM clients WHERE client_code = 'D-CLI-001'), 'Prepare Acme renewal deck', 'Create a client-ready renewal deck with usage wins and next-year pricing options.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-001'), 'deep_sales_manager', 'completed', 'high', '2026-05-09', '2026-05-08 15:30:00+00', 'Sent final renewal deck to Priya.'),
-  ('D-TASK-002', (SELECT id FROM clients WHERE client_code = 'D-CLI-002'), 'Resolve Northstar escalation', 'Coordinate with support and send a recovery plan for delayed shipments dashboard.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-002'), 'deep_sales_manager', 'in_progress', 'critical', '2026-06-05', NULL, NULL),
-  ('D-TASK-003', (SELECT id FROM clients WHERE client_code = 'D-CLI-003'), 'Greenleaf warehouse onboarding', 'Train warehouse users and verify barcode sync setup.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-003'), 'deep_support_manager', 'completed', 'medium', '2026-05-21', '2026-05-20 11:00:00+00', 'Training completed for both warehouse teams.'),
-  ('D-TASK-004', (SELECT id FROM clients WHERE client_code = 'D-CLI-004'), 'Draft BrightPath pilot checklist', 'Prepare pilot success checklist and first-week onboarding timeline.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-004'), 'deep_support_manager', 'todo', 'medium', '2026-06-14', NULL, NULL),
-  ('D-TASK-005', (SELECT id FROM clients WHERE client_code = 'D-CLI-002'), 'Northstar executive follow-up', 'Schedule a follow-up with Kabir after escalation notes are approved.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-001'), 'deep_sales_manager', 'todo', 'high', '2026-06-03', NULL, NULL)
+  ('D-TASK-001', (SELECT id FROM clients WHERE client_code = 'D-CLI-001'), 'Prepare Acme renewal deck', 'Create a client-ready renewal deck with usage wins and next-year pricing options.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-001'), 'deep_manager_1', 'completed', 'high', '2026-05-09', '2026-05-08 15:30:00+00', 'Sent final renewal deck to Priya.'),
+  ('D-TASK-002', (SELECT id FROM clients WHERE client_code = 'D-CLI-002'), 'Resolve Northstar escalation', 'Coordinate with support and send a recovery plan for delayed shipments dashboard.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-002'), 'deep_manager_1', 'in_progress', 'critical', '2026-06-05', NULL, NULL),
+  ('D-TASK-003', (SELECT id FROM clients WHERE client_code = 'D-CLI-003'), 'Greenleaf warehouse onboarding', 'Train warehouse users and verify barcode sync setup.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-003'), 'deep_manager_2', 'completed', 'medium', '2026-05-21', '2026-05-20 11:00:00+00', 'Training completed for both warehouse teams.'),
+  ('D-TASK-004', (SELECT id FROM clients WHERE client_code = 'D-CLI-004'), 'Draft BrightPath pilot checklist', 'Prepare pilot success checklist and first-week onboarding timeline.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-004'), 'deep_manager_2', 'todo', 'medium', '2026-06-14', NULL, NULL),
+  ('D-TASK-005', (SELECT id FROM clients WHERE client_code = 'D-CLI-002'), 'Northstar executive follow-up', 'Schedule a follow-up with Kabir after escalation notes are approved.', (SELECT id FROM employees WHERE employee_code = 'D-EMP-001'), 'deep_manager_1', 'todo', 'high', '2026-06-03', NULL, NULL)
 ON CONFLICT (task_code) DO UPDATE SET
   client_id = EXCLUDED.client_id,
   title = EXCLUDED.title,
@@ -87,8 +87,8 @@ ON CONFLICT (task_code) DO UPDATE SET
 
 INSERT INTO task_comments (comment_code, task_id, author_actor_id, body)
 VALUES
-  ('D-COM-001', (SELECT id FROM client_tasks WHERE task_code = 'D-TASK-002'), 'deep_sales_manager', 'Ask support for dashboard latency screenshots before client call.'),
-  ('D-COM-002', (SELECT id FROM client_tasks WHERE task_code = 'D-TASK-003'), 'deep_support_manager', 'Greenleaf confirmed the barcode scanner checklist is complete.')
+  ('D-COM-001', (SELECT id FROM client_tasks WHERE task_code = 'D-TASK-002'), 'deep_manager_1', 'Ask support for dashboard latency screenshots before client call.'),
+  ('D-COM-002', (SELECT id FROM client_tasks WHERE task_code = 'D-TASK-003'), 'deep_manager_2', 'Greenleaf confirmed the barcode scanner checklist is complete.')
 ON CONFLICT (comment_code) DO UPDATE SET
   task_id = EXCLUDED.task_id,
   author_actor_id = EXCLUDED.author_actor_id,

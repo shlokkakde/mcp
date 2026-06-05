@@ -18,8 +18,8 @@ INSERT INTO manager_access_policies (
   updated_by_actor_id
 )
 VALUES
-  ('poojan_growth_manager', 'Poojan Growth Manager', 'P-GROWTH', true, true, false, true, true, true, true, 'seed'),
-  ('poojan_delivery_manager', 'Poojan Delivery Manager', 'P-DELIVERY', true, true, false, true, true, true, true, 'seed')
+  ('poojan_manager_1', 'Poojan manager 1', 'P-GROWTH', true, true, false, true, true, true, true, 'seed'),
+  ('poojan_manager_2', 'Poojan manager 2', 'P-DELIVERY', true, true, false, true, true, true, true, 'seed')
 ON CONFLICT (actor_id) DO UPDATE SET
   actor_name = EXCLUDED.actor_name,
   team_code = EXCLUDED.team_code,
@@ -67,11 +67,11 @@ ON CONFLICT (client_code) DO UPDATE SET
 
 INSERT INTO client_tasks (task_code, client_id, title, description, assigned_employee_id, created_by_actor_id, status, priority, due_date, completed_at, completion_notes)
 VALUES
-  ('P-TASK-001', (SELECT id FROM clients WHERE client_code = 'P-CLI-001'), 'Nova Health upsell analysis', 'Summarize adoption metrics and identify three upsell hooks.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-001'), 'poojan_growth_manager', 'completed', 'critical', '2026-05-17', '2026-05-16 10:15:00+00', 'Shared upsell analysis with CEO Poojan.'),
-  ('P-TASK-002', (SELECT id FROM clients WHERE client_code = 'P-CLI-002'), 'UrbanNest campaign report', 'Prepare channel-level campaign report and client talking points.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-002'), 'poojan_growth_manager', 'in_progress', 'high', '2026-06-09', NULL, NULL),
-  ('P-TASK-003', (SELECT id FROM clients WHERE client_code = 'P-CLI-003'), 'Skyline rollout recovery', 'Create revised rollout timeline and send daily update plan.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-003'), 'poojan_delivery_manager', 'blocked', 'high', '2026-06-04', NULL, NULL),
-  ('P-TASK-004', (SELECT id FROM clients WHERE client_code = 'P-CLI-004'), 'FinEdge security questionnaire', 'Collect answers for security questionnaire and flag unanswered compliance items.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-004'), 'poojan_delivery_manager', 'todo', 'medium', '2026-06-12', NULL, NULL),
-  ('P-TASK-005', (SELECT id FROM clients WHERE client_code = 'P-CLI-003'), 'Skyline sponsor call notes', 'Document sponsor concerns and extract action items from the escalation call.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-004'), 'poojan_delivery_manager', 'completed', 'medium', '2026-05-28', '2026-05-28 12:10:00+00', 'Uploaded notes and action item list.')
+  ('P-TASK-001', (SELECT id FROM clients WHERE client_code = 'P-CLI-001'), 'Nova Health upsell analysis', 'Summarize adoption metrics and identify three upsell hooks.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-001'), 'poojan_manager_1', 'completed', 'critical', '2026-05-17', '2026-05-16 10:15:00+00', 'Shared upsell analysis with CEO Poojan.'),
+  ('P-TASK-002', (SELECT id FROM clients WHERE client_code = 'P-CLI-002'), 'UrbanNest campaign report', 'Prepare channel-level campaign report and client talking points.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-002'), 'poojan_manager_1', 'in_progress', 'high', '2026-06-09', NULL, NULL),
+  ('P-TASK-003', (SELECT id FROM clients WHERE client_code = 'P-CLI-003'), 'Skyline rollout recovery', 'Create revised rollout timeline and send daily update plan.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-003'), 'poojan_manager_2', 'blocked', 'high', '2026-06-04', NULL, NULL),
+  ('P-TASK-004', (SELECT id FROM clients WHERE client_code = 'P-CLI-004'), 'FinEdge security questionnaire', 'Collect answers for security questionnaire and flag unanswered compliance items.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-004'), 'poojan_manager_2', 'todo', 'medium', '2026-06-12', NULL, NULL),
+  ('P-TASK-005', (SELECT id FROM clients WHERE client_code = 'P-CLI-003'), 'Skyline sponsor call notes', 'Document sponsor concerns and extract action items from the escalation call.', (SELECT id FROM employees WHERE employee_code = 'P-EMP-004'), 'poojan_manager_2', 'completed', 'medium', '2026-05-28', '2026-05-28 12:10:00+00', 'Uploaded notes and action item list.')
 ON CONFLICT (task_code) DO UPDATE SET
   client_id = EXCLUDED.client_id,
   title = EXCLUDED.title,
@@ -87,8 +87,8 @@ ON CONFLICT (task_code) DO UPDATE SET
 
 INSERT INTO task_comments (comment_code, task_id, author_actor_id, body)
 VALUES
-  ('P-COM-001', (SELECT id FROM client_tasks WHERE task_code = 'P-TASK-003'), 'poojan_delivery_manager', 'Waiting on Skyline IT for final rollout window.'),
-  ('P-COM-002', (SELECT id FROM client_tasks WHERE task_code = 'P-TASK-001'), 'poojan_growth_manager', 'Nova Health liked the diagnostics workflow proposal.')
+  ('P-COM-001', (SELECT id FROM client_tasks WHERE task_code = 'P-TASK-003'), 'poojan_manager_2', 'Waiting on Skyline IT for final rollout window.'),
+  ('P-COM-002', (SELECT id FROM client_tasks WHERE task_code = 'P-TASK-001'), 'poojan_manager_1', 'Nova Health liked the diagnostics workflow proposal.')
 ON CONFLICT (comment_code) DO UPDATE SET
   task_id = EXCLUDED.task_id,
   author_actor_id = EXCLUDED.author_actor_id,

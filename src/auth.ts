@@ -30,33 +30,33 @@ const actorDirectory: Record<string, Actor> = {
     role: "ceo",
     companies: ["deep", "poojan"]
   },
-  deep_sales_manager: {
-    id: "deep_sales_manager",
-    name: "Deep Sales Manager",
+  deep_manager_1: {
+    id: "deep_manager_1",
+    name: "Deep manager 1",
     role: "manager",
     companies: ["deep"],
     company: "deep",
     teamCode: "D-SALES"
   },
-  deep_support_manager: {
-    id: "deep_support_manager",
-    name: "Deep Support Manager",
+  deep_manager_2: {
+    id: "deep_manager_2",
+    name: "Deep manager 2",
     role: "manager",
     companies: ["deep"],
     company: "deep",
     teamCode: "D-SUPPORT"
   },
-  poojan_growth_manager: {
-    id: "poojan_growth_manager",
-    name: "Poojan Growth Manager",
+  poojan_manager_1: {
+    id: "poojan_manager_1",
+    name: "Poojan manager 1",
     role: "manager",
     companies: ["poojan"],
     company: "poojan",
     teamCode: "P-GROWTH"
   },
-  poojan_delivery_manager: {
-    id: "poojan_delivery_manager",
-    name: "Poojan Delivery Manager",
+  poojan_manager_2: {
+    id: "poojan_manager_2",
+    name: "Poojan manager 2",
     role: "manager",
     companies: ["poojan"],
     company: "poojan",

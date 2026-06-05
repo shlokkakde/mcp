@@ -57,28 +57,28 @@ const demoUsers = [
     password: process.env.POOJAN_CEO_PASSWORD || "poojan-ceo-pass"
   },
   {
-    actorId: "deep_sales_manager",
-    label: "Deep Sales Manager",
-    email: process.env.DEEP_SALES_MANAGER_EMAIL || "deep.sales.manager@crm.example",
-    password: process.env.DEEP_SALES_MANAGER_PASSWORD || "manager-pass"
+    actorId: "deep_manager_1",
+    label: "Deep manager 1",
+    email: process.env.DEEP_MANAGER_1_EMAIL || "deep.manager1@crm.example",
+    password: process.env.DEEP_MANAGER_1_PASSWORD || "manager-pass"
   },
   {
-    actorId: "deep_support_manager",
-    label: "Deep Support Manager",
-    email: process.env.DEEP_SUPPORT_MANAGER_EMAIL || "deep.support.manager@crm.example",
-    password: process.env.DEEP_SUPPORT_MANAGER_PASSWORD || "manager-pass"
+    actorId: "deep_manager_2",
+    label: "Deep manager 2",
+    email: process.env.DEEP_MANAGER_2_EMAIL || "deep.manager2@crm.example",
+    password: process.env.DEEP_MANAGER_2_PASSWORD || "manager-pass"
   },
   {
-    actorId: "poojan_growth_manager",
-    label: "Poojan Growth Manager",
-    email: process.env.POOJAN_GROWTH_MANAGER_EMAIL || "poojan.growth.manager@crm.example",
-    password: process.env.POOJAN_GROWTH_MANAGER_PASSWORD || "manager-pass"
+    actorId: "poojan_manager_1",
+    label: "Poojan manager 1",
+    email: process.env.POOJAN_MANAGER_1_EMAIL || "poojan.manager1@crm.example",
+    password: process.env.POOJAN_MANAGER_1_PASSWORD || "manager-pass"
   },
   {
-    actorId: "poojan_delivery_manager",
-    label: "Poojan Delivery Manager",
-    email: process.env.POOJAN_DELIVERY_MANAGER_EMAIL || "poojan.delivery.manager@crm.example",
-    password: process.env.POOJAN_DELIVERY_MANAGER_PASSWORD || "manager-pass"
+    actorId: "poojan_manager_2",
+    label: "Poojan manager 2",
+    email: process.env.POOJAN_MANAGER_2_EMAIL || "poojan.manager2@crm.example",
+    password: process.env.POOJAN_MANAGER_2_PASSWORD || "manager-pass"
   }
 ];
 

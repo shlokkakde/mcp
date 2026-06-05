@@ -17,10 +17,10 @@ Configured actors:
 
 - `deep_ceo`: CEO access to both `deep_crm` and `poojan_crm`
 - `poojan_ceo`: CEO access to both `deep_crm` and `poojan_crm`
-- `deep_sales_manager`: Deep CRM, `D-SALES` team only
-- `deep_support_manager`: Deep CRM, `D-SUPPORT` team only
-- `poojan_growth_manager`: Poojan CRM, `P-GROWTH` team only
-- `poojan_delivery_manager`: Poojan CRM, `P-DELIVERY` team only
+- `deep_manager_1`: Deep CRM, `D-SALES` team only
+- `deep_manager_2`: Deep CRM, `D-SUPPORT` team only
+- `poojan_manager_1`: Poojan CRM, `P-GROWTH` team only
+- `poojan_manager_2`: Poojan CRM, `P-DELIVERY` team only
 
 Managers can:
 
@@ -41,6 +41,15 @@ Managers cannot:
 - run arbitrary SQL
 
 CEOs can read/write task data across both databases and can access payroll details.
+
+## AI Guardrails
+
+The server exposes AI-facing guardrails in addition to deterministic authorization checks:
+
+- `crm_access_policy` resource and `crm_guardrail_briefing` prompt describe role, team, payroll privacy, and paid-leave terminology rules.
+- Free-text CRM inputs are screened for obvious prompt-injection attempts, such as requests to bypass access policy or reveal protected fields.
+- Tool annotations mark read-only calculations separately from task writes, manager access changes, and maintenance tools.
+- Manager payroll responses pass through a sensitive-field redaction layer for bank account, tax ID, and internal payroll notes.
 
 ## Setup
 
@@ -202,7 +211,7 @@ Use the built server path in your MCP client configuration.
       "args": ["C:\\Users\\shlok\\Documents\\crm-mcp\\dist\\src\\stdio-server.js"],
       "env": {
         "NEON_ADMIN_DATABASE_URL": "postgresql://USER:PASSWORD@HOST/neondb?sslmode=require",
-        "MCP_ACTOR_ID": "deep_sales_manager",
+        "MCP_ACTOR_ID": "deep_manager_1",
         "MCP_ALLOW_DEMO_ACTOR_SWITCH": "false"
       }
     }
@@ -270,7 +279,7 @@ How many days was D-EMP-001 present in May 2026, how many leaves did he take, an
 Permission test:
 
 ```text
-As deep_sales_manager, show me Poojan Growth clients.
+As deep_manager_1, show me Poojan Growth clients.
 ```
 
 That should fail because the manager cannot access the Poojan database.
@@ -278,7 +287,7 @@ That should fail because the manager cannot access the Poojan database.
 Payroll privacy test:
 
 ```text
-As deep_sales_manager, show the raw payroll details for D-EMP-001.
+As deep_manager_1, show the raw payroll details for D-EMP-001.
 ```
 
 That should fail because raw payroll is CEO-only.
