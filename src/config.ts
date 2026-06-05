@@ -21,6 +21,9 @@ export const publicBaseUrl = defaultPublicBaseUrl();
 export const oauthIssuer = cleanBaseUrl(process.env.OAUTH_ISSUER || publicBaseUrl);
 export const jwtSecret = process.env.AUTH_JWT_SECRET || "dev-only-change-this-secret";
 export const accessTokenTtlSeconds = Number(process.env.ACCESS_TOKEN_TTL_SECONDS || 60 * 60);
+export const gmailUser = process.env.GMAIL_USER || "";
+export const gmailAppPassword = process.env.GMAIL_APP_PASSWORD || "";
+export const taskNotificationFromEmail = process.env.TASK_NOTIFICATION_FROM_EMAIL || gmailUser;
 
 export type EmbeddingProvider = "openai" | "gemini";
 

@@ -24,6 +24,7 @@ import {
 } from "./access-control.js";
 import { defaultReportingMonth } from "./config.js";
 import { queryRows } from "./db.js";
+import { sendTaskAssignmentEmail } from "./email.js";
 import {
   embeddingSourceTypes,
   getTaskEmbeddingText,
@@ -914,10 +915,25 @@ server.registerTool(
       ]
     );
 
+    const createdTask = rows[0];
+    const emailNotification = await sendTaskAssignmentEmail({
+      to: employee.email,
+      employeeName: employee.full_name,
+      taskCode: createdTask.task_code,
+      taskTitle: createdTask.title,
+      taskDescription: createdTask.description,
+      clientCode: createdTask.client_code,
+      clientName: createdTask.client_name,
+      dueDate: createdTask.due_date,
+      priority: createdTask.priority,
+      assignedBy: actor.name
+    });
+
     return jsonResult({
       actor: publicActor(actor),
       company: targetCompany,
-      created_task: rows[0]
+      created_task: createdTask,
+      email_notification: emailNotification
     });
   }
 );

@@ -27,7 +27,7 @@ Managers can:
 - read their own team employees
 - read their own team clients
 - read their own team client tasks
-- assign client tasks only to their own team employees
+- assign client tasks only to their own team employees, with optional email notification to the assigned employee
 - update status/comment on their own team tasks
 - query attendance for their own team employees
 - calculate payable salary for their own team employees from attendance, overtime, incentives, bonuses, and deductions
@@ -169,9 +169,14 @@ EMBEDDING_PROVIDER=gemini
 GEMINI_API_KEY=your-google-ai-studio-key-if-using-embeddings
 EMBEDDING_MODEL=gemini-embedding-001
 EMBEDDING_DIMENSIONS=1536
+GMAIL_USER=your.gmail.account@gmail.com
+GMAIL_APP_PASSWORD=your-gmail-app-password-if-sending-task-emails
+TASK_NOTIFICATION_FROM_EMAIL=CRM Demo <your.gmail.account@gmail.com>
 ```
 
 Also add the demo login email/password variables from `.env.example` if you want custom accounts.
+
+Task assignment email is optional. If `GMAIL_USER` or `GMAIL_APP_PASSWORD` is missing, `assign_client_task` still creates the task and returns an `email_notification` object explaining that mail was skipped. Gmail requires an app password; do not put your normal Gmail account password in `.env` or Vercel.
 
 5. Create the Neon databases and seed data once from your machine:
 
